@@ -24,7 +24,7 @@ type Table struct {
 
 type Item struct {
 	Id      string
-	content interface{}
+	Content interface{}
 }
 
 func (db *InMemoryDB) Create(tableName string, items ...Item) error {
@@ -35,7 +35,8 @@ func (db *InMemoryDB) Create(tableName string, items ...Item) error {
 			return fmt.Errorf("Table must have a name ")
 		}
 		table := Table{
-			Name: tableName,
+			Name:  tableName,
+			Items: make(map[string]Item),
 		}
 		for _, item := range items {
 			if item.Id == "" {

@@ -11,6 +11,11 @@ import (
 
 var db *sql.DB
 
+type CartDB struct {
+	Driver     string
+	DataSource string
+}
+
 //Item is the model used for articles in a cart
 type Item struct {
 	Id     int
@@ -25,8 +30,9 @@ type Cart struct {
 	Items []Item
 }
 
-func OpenCartDB() error {
-	db, _ = sql.Open("mysql", "iecheniq:HoUsE22$@tcp(localhost:3306)/shopping_cart")
+func (database *CartDB) OpenCartDB() error {
+	db, _ = sql.Open(database.Driver, database.DataSource)
+
 	err := db.Ping()
 	if err != nil {
 		return err
@@ -34,7 +40,7 @@ func OpenCartDB() error {
 	return nil
 }
 
-func CloseCartDB() {
+func (database *CartDB) CloseCartDB() {
 	db.Close()
 }
 

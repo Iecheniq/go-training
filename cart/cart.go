@@ -12,10 +12,15 @@ import (
 
 func main() {
 
-	if err := cartutils.OpenCartDB(); err != nil {
+	db := cartutils.CartDB{
+		Driver:     "mysql",
+		DataSource: "iecheniq:HoUsE22$@tcp(localhost:3306)/shopping_cart",
+	}
+
+	if err := db.OpenCartDB(); err != nil {
 		log.Fatal(err)
 	}
-	defer cartutils.CloseCartDB()
+	defer db.CloseCartDB()
 	setRouts()
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

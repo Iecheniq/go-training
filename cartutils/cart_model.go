@@ -9,18 +9,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type Cartg interface {
-	GetAllCarts(*sql.DB) (map[string]Cart, error)
-	GetCartById(*sql.DB) (Cart, error)
-	CreateCart(*sql.DB) error
-	DeleteCartById(*sql.DB)
-	GetAllCartItems(*sql.DB) ([]Item, error)
-	GetCartItem(*sql.DB) (Item, error)
-	CreateCartItem(*sql.DB, Item) error
-	DeleteCartItem(*sql.DB) error
-	UpdateCartItem(*sql.DB) error
-}
-
 var db *sql.DB
 
 //Item is the model used for articles in a cart
@@ -233,4 +221,40 @@ func (cart *Cart) GetCartItem(id int) (Item, error) {
 		return item, err
 	}
 	return item, nil
+}
+
+func (cart *Cart) DeleteCartItem(id int) error {
+	stmt, err := db.Prepare("DELETE FROM items WHERE id = ? AND cart_id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(id, cart.Id)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Printf("affected = %d\n", rowCnt)
+	return nil
+}
+
+func (cart *Cart) UpdateCartItemPrice(price float64, id int) error {
+	stmt, err := db.Prepare("UPDATE items SET price = ? WHERE id = ? AND cart_id = ? ")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(price, id, cart.Id)
+	if err != nil {
+		return err
+	}
+	rowCnt, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	log.Printf("affected = %d\n", rowCnt)
+	return nil
 }

@@ -41,7 +41,6 @@ func CartsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 
 	} else if r.Method == "POST" {
 
@@ -53,7 +52,6 @@ func CartsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusCreated)
 	} else {
 		http.Error(w, "Allowed methods: GET, POST", http.StatusMethodNotAllowed)
 		return
@@ -93,7 +91,6 @@ func CartHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 	} else if r.Method == "DELETE" {
 
 		if err := cart.DeleteCartById(); err != nil {
@@ -104,7 +101,6 @@ func CartHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 	} else {
 		http.Error(w, "Allowed methods: GET, DELETE", http.StatusMethodNotAllowed)
 		return
@@ -184,8 +180,7 @@ func CartItemsHandler(w http.ResponseWriter, r *http.Request) {
 //CartItemHandler handles a specific item in a cart
 //GET: Get a specific item
 //DELETE: Delete item
-//UPDATE: Update item
-//PATCH: Modify item
+//PATCH: Modify item price
 func CartItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
@@ -202,7 +197,6 @@ func CartItemHandler(w http.ResponseWriter, r *http.Request) {
 			if err == sql.ErrNoRows {
 				if _, err := w.Write([]byte(fmt.Sprintf("Cart %v has no item with ID %v", cart.Id, itemID))); err != nil {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
-
 				}
 				return
 			}
@@ -218,7 +212,38 @@ func CartItemHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
-
+	} else if r.Method == "DELETE" {
+		if err := cart.DeleteCartItem(itemID); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if _, err := w.Write([]byte(fmt.Sprintf("Item with ID %v has been deleted from Cart %v", itemID, cartID))); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	} else if r.Method == "PATCH" {
+		r.ParseForm()
+		price := r.Form.Get("price")
+		if price == "" {
+			if _, err := w.Write([]byte(fmt.Sprintf("Price must not be empty and must be a float"))); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+		itemPrice, err := strconv.ParseFloat(price, 64)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if err := cart.UpdateCartItemPrice(itemPrice, itemID); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if _, err := w.Write([]byte(fmt.Sprintf("Item price has been updated"))); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		http.Error(w, "Allowed methods: GET, DELETE, PATCH", http.StatusMethodNotAllowed)
+		return
 	}
 }

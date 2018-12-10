@@ -36,7 +36,7 @@ func setRouts() {
 		Methods("GET", "POST", "DELETE").
 		Name("items")
 	cartSubrouter.HandleFunc("/items/{itemID:[0-9]+}", cartutils.CartItemHandler).
-		Methods("GET", "DELETE", "UPDATE", "PATCH").
+		Methods("GET", "DELETE", "PATCH").
 		Name("item_details")
 	http.Handle("/", r)
 }

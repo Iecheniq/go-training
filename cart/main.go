@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	mux "github.com/gorilla/mux"
-	"github.com/iecheniq/go_bootcamp/cartutils"
+	"github.com/iecheniq/go_bootcamp/cart/cartutils"
 
 	_ "github.com/go-sql-driver/mysql"
 )
